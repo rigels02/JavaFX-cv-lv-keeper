@@ -1,4 +1,4 @@
-Just trial example to scrape and keep selected web pages information from Web cv.lv
+Example to scrape and keep selected web pages information from Web cv.lv
 =======================================================================
 Used
 ----
@@ -10,7 +10,7 @@ Used
 There are also available sample classes for Dom Parser (DomParser.java) and
 XStream parser (XSteamParser.java -> XStreamTransformer.java). 
 
-XStrean drivers
+XStream drivers
 ---------------
 According to http://x-stream.github.io/tutorial.html
 

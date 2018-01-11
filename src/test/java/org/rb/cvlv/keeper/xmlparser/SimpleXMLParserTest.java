@@ -11,6 +11,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import org.rb.cvlv.keeper.model.Keep;
 import org.rb.cvlv.keeper.model.XKeep;
+import org.rb.cvlv.keeper.model.XStatus;
 
 /**
  *
@@ -175,6 +176,40 @@ public class SimpleXMLParserTest {
                         "http://test2.lv", "comments2", htmlScrap),
           new XKeep("Title3Ņ", "location3ņ", sf.parse("27.11.2017"), sf.parse("27.12.2017"),
                         "http://test3.lv", "comments3", htmlScrap)
+        );
+        String filePath = "testXML.xml";
+        SimpleXMLParser parser = new SimpleXMLParser();
+        parser.serializeXMLFile(keep, filePath);
+        
+        List<XKeep> keep2 = parser.deserializeXMLFile(filePath);
+        for (Keep keep1 : keep2) {
+            System.out.println("->"+keep1);
+        }
+        //compareResult(keep, keep2);
+        assertEquals(keep.toString(), keep2.toString());
+    }
+    
+    @Test
+    public void testSerializeDeserializeXMLFileUTF8_2() throws Exception {
+        System.out.println("testSerializeDeserializeXMLFileUTF8");
+       SimpleDateFormat sf = new SimpleDateFormat("dd.MM.yyyy");
+        String htmlScrap = "<div><h1>Header</h1><p>paragraph ĀāČčŅņ</p></div>";
+        List<XKeep> keep =  Arrays.asList(
+         new XKeep("Title1Ā", "location1ā", sf.parse("29.11.2017"), sf.parse("29.12.2017"),
+                        "http://test1.lv", "comments1", htmlScrap,
+                        XStatus.Canceled,sf.parse("01.12.2017"),sf.parse("02.12.2017"),
+                        sf.parse("03.12.2017"),sf.parse("04.12.2017") 
+                    ),
+          new XKeep("Title2Š", "location2š", sf.parse("28.11.2017"), sf.parse("28.12.2017"),
+                        "http://test2.lv", "comments2", htmlScrap,
+                        XStatus.Canceled,sf.parse("01.12.2017"),sf.parse("02.12.2017"),
+                        sf.parse("03.12.2017"),sf.parse("04.12.2017")
+                    ),
+          new XKeep("Title3Ņ", "location3ņ", sf.parse("27.11.2017"), sf.parse("27.12.2017"),
+                        "http://test3.lv", "comments3", htmlScrap,
+                    XStatus.Canceled,sf.parse("01.12.2017"),sf.parse("02.12.2017"),
+                        sf.parse("03.12.2017"),sf.parse("04.12.2017")
+                    )
         );
         String filePath = "testXML.xml";
         SimpleXMLParser parser = new SimpleXMLParser();

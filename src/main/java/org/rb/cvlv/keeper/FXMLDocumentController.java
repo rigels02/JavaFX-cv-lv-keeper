@@ -27,6 +27,8 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -39,6 +41,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.rb.cvlv.keeper.model.Keep;
 import org.rb.cvlv.keeper.model.XKeep;
+import org.rb.cvlv.keeper.model.XStatus;
 import org.rb.cvlv.keeper.parser.ParserJsoup;
 import org.rb.cvlv.keeper.xmlparser.SimpleXMLParser;
 import org.w3c.dom.Document;
@@ -72,7 +75,8 @@ public class FXMLDocumentController implements Initializable {
     
      private SimpleDateFormat sf;
    
-     
+//icons for listview
+private Image i_noapp,i_apply, i_int1, i_int2, i_canceled;     
      
      
     @Override
@@ -80,6 +84,11 @@ public class FXMLDocumentController implements Initializable {
         //
         String ex = (String) MainApp.getPrimaryStage().getProperties().get("hi");
         //
+        i_noapp = new Image(getClass().getResourceAsStream("/images/notapplyt.png"));
+        i_apply = new Image(getClass().getResourceAsStream("/images/applyt.png"));
+        i_int1 = new Image(getClass().getResourceAsStream("/images/int1t.png"));
+        i_int2 = new Image(getClass().getResourceAsStream("/images/int2t.png"));
+        i_canceled = new Image(getClass().getResourceAsStream("/images/cancelt.png"));
         sf = new SimpleDateFormat(DATEFMT);
         loadData();
         
@@ -120,21 +129,50 @@ public class FXMLDocumentController implements Initializable {
                          if (item == null || empty) {
                              setText(null);
                              setStyle("");
+                             setGraphic(null);
                          } else {
                              
                              setText(item.printItem(sf));
                              setStyle("-fx-padding:4px;-fx-border-width:1px;-fx-border-color: green;-fx-border-radius: 5;");
-                             
+                             ImageView icon = getIcon(item.getStatus());
+                             //resizeImageView(icon);
+                             setGraphic(icon);
                          }
                      }
-                     
+
                 }
          ;
         }});
         
     }
         
-    
+private ImageView getIcon(XStatus status) {
+    ImageView rect = null;
+    switch(status){
+        case Apply:
+            rect = new ImageView(i_apply);
+            break;
+        case Interv_1:
+            rect = new ImageView(i_int1);
+            break;
+        case Interv_2:
+            rect = new ImageView(i_int2);
+            break;
+        case Canceled:
+            rect = new ImageView(i_canceled);
+            break;
+        default:
+            rect = new ImageView(i_noapp);
+            
+    }
+    return rect;
+}
+
+private void resizeImageView(ImageView icon) {
+    icon.setFitWidth(24);
+    icon.setPreserveRatio(true);
+}
+
     private String transformXML(Document xmlDoc) {
         
         String xml =null;

@@ -7,7 +7,7 @@ import org.simpleframework.xml.Default;
 
 /**
  *
- * XML doc model
+ * XML doc model for SimpleXml
  * @author raitis
  */
 @Default

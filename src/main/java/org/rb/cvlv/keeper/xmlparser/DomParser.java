@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -19,7 +20,8 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.rb.cvlv.keeper.files.TxtFiles;
 import org.rb.cvlv.keeper.model.XKeep;
-import org.rb.cvlv.keeper.model.XKeepBuilder;
+import org.rb.cvlv.keeper.model.XStatus;
+
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -37,6 +39,12 @@ import org.xml.sax.SAXException;
  *      &lt;published&gt;&lt;/published&gt;
  *      &lt;deadline&gt;&lt;/deadline&gt;
  *      &lt;pageUrl&gt;&lt;/pageUrl&gt;
+ * ---- added fields 9Jan2018 ---
+ *      &lt;status&gt; &lt;status&gt;
+ *      &lt;Applyed&gt; &lt;Applyed&gt;
+ *      &lt;1stInterview&gt; &lt;1stInterview&gt;
+ *      &lt;2ndInterview&gt; &lt;2ndInterview&gt;
+ *      &lt;Canceled&gt; &lt;Canceled&gt;
  *  &lt;/keep&gt;
  * &lt;/bookmarks&gt;
  * </pre>
@@ -53,6 +61,12 @@ public class DomParser implements IXmlParser {
     public final static String PAGEURL_EL="pageUrl";
     public final static String COMMENT_EL="comments";
     public final static String HTMLSCRAP_EL="htmlScrap";
+    //-- XKeep extended by additional fields 9Jan2018
+    public final static String STATUS_EL="Status";
+    public final static String APPLDATE_EL="Applyed";
+    public final static String INT1DATE_EL="Interview_1";
+    public final static String INT2DATE_EL="Interview_2";
+    public final static String CANCELED_EL="Canceled";
     
      
     private List<XKeep> keeps;
@@ -140,6 +154,30 @@ public class DomParser implements IXmlParser {
                 Element htmlScrap = doc.createElement(HTMLSCRAP_EL);
 		htmlScrap.appendChild(doc.createTextNode(keep.getHtmlScrap()));
 		keepEL.appendChild(htmlScrap);
+                //-- XKeep extended by additional fields 9Jan2018
+                Element status = doc.createElement(STATUS_EL);
+		status.appendChild(doc.createTextNode(keep.getStatus().name()));
+		keepEL.appendChild(status);
+                if(keep.getApplyDate()!=null){
+                Element applDate = doc.createElement(APPLDATE_EL);
+		applDate.appendChild(doc.createTextNode(sf.format(keep.getApplyDate())));
+		keepEL.appendChild(applDate);
+                }
+                if(keep.getInt1Date()!=null){
+                Element int1 = doc.createElement(INT1DATE_EL);
+		int1.appendChild(doc.createTextNode(sf.format(keep.getInt1Date())));
+		keepEL.appendChild(int1);
+                }
+                if(keep.getInt2Date()!=null){
+                Element int2 = doc.createElement(INT2DATE_EL);
+		int2.appendChild(doc.createTextNode(sf.format(keep.getInt2Date())));
+		keepEL.appendChild(int2);
+                }
+                if(keep.getCancelDate()!=null){
+                Element cancel = doc.createElement(CANCELED_EL);
+		cancel.appendChild(doc.createTextNode(sf.format(keep.getCancelDate())));
+		keepEL.appendChild(cancel);
+                }
     }
     
     @Override
@@ -159,7 +197,20 @@ public class DomParser implements IXmlParser {
             if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 
 			Element eElement = (Element) nNode;
-              XKeep keep = new XKeepBuilder().setTitle(eElement.getElementsByTagName(TITLE_EL).item(0).getTextContent()).setLocation(eElement.getElementsByTagName(LOCATION_EL).item(0).getTextContent()).setPublished(sf.parse(eElement.getElementsByTagName(PUBLISHED_EL).item(0).getTextContent())).setDeadline(sf.parse(eElement.getElementsByTagName(DEADLINE_EL).item(0).getTextContent())).setPageUrl(eElement.getElementsByTagName(PAGEURL_EL).item(0).getTextContent()).setComments(eElement.getElementsByTagName(COMMENT_EL).item(0).getTextContent()).setHtmlScrap(eElement.getElementsByTagName(HTMLSCRAP_EL).item(0).getTextContent()).createXKeep();
+             // XKeep keep = new XKeepBuilder().setTitle(eElement.getElementsByTagName(TITLE_EL).item(0).getTextContent()).setLocation(eElement.getElementsByTagName(LOCATION_EL).item(0).getTextContent()).setPublished(sf.parse(eElement.getElementsByTagName(PUBLISHED_EL).item(0).getTextContent())).setDeadline(sf.parse(eElement.getElementsByTagName(DEADLINE_EL).item(0).getTextContent())).setPageUrl(eElement.getElementsByTagName(PAGEURL_EL).item(0).getTextContent()).setComments(eElement.getElementsByTagName(COMMENT_EL).item(0).getTextContent()).setHtmlScrap(eElement.getElementsByTagName(HTMLSCRAP_EL).item(0).getTextContent()).createXKeep();
+              XKeep keep = new XKeep(eElement.getElementsByTagName(TITLE_EL).item(0).getTextContent(), 
+                      eElement.getElementsByTagName(LOCATION_EL).item(0).getTextContent(), 
+                      sf.parse(eElement.getElementsByTagName(PUBLISHED_EL).item(0).getTextContent()), 
+                      sf.parse(eElement.getElementsByTagName(DEADLINE_EL).item(0).getTextContent()), 
+                      eElement.getElementsByTagName(PAGEURL_EL).item(0).getTextContent(), 
+                      eElement.getElementsByTagName(COMMENT_EL).item(0).getTextContent(), 
+                      eElement.getElementsByTagName(HTMLSCRAP_EL).item(0).getTextContent(),
+                      parseXStatus(eElement.getElementsByTagName(STATUS_EL).item(0).getTextContent()),
+                      parseDateElByTagName(eElement,sf,APPLDATE_EL),
+                       parseDateElByTagName(eElement,sf,INT1DATE_EL),
+                       parseDateElByTagName(eElement,sf,INT2DATE_EL),
+                       parseDateElByTagName(eElement,sf,CANCELED_EL)
+                     );
               keeps.add(keep);
             }
         }
@@ -181,5 +232,16 @@ public class DomParser implements IXmlParser {
         if(xmlDoc.isEmpty()) return new ArrayList<>();
         return deserializeXML(xmlDoc);
         
+    }
+
+    private Date parseDateElByTagName(Element eElement, SimpleDateFormat sf, String EL_Name) throws ParseException {
+       if(eElement !=null && eElement.getElementsByTagName(EL_Name).item(0)!=null){
+        return sf.parse(eElement.getElementsByTagName(EL_Name).item(0).getTextContent());
+       }
+       return null;
+    }
+
+    private XStatus parseXStatus(String textContent) {
+       return XStatus.valueOf(textContent);
     }
 }
