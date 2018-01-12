@@ -40,6 +40,7 @@ import javafx.util.converter.LocalDateStringConverter;
 import org.rb.cvlv.keeper.files.PdfWriter;
 import org.rb.cvlv.keeper.model.XKeep;
 import org.rb.cvlv.keeper.model.XStatus;
+import org.rb.cvlv.keeper.utils.Utils;
 import org.rb.cvlv.keeper.xmlparser.SimpleXMLParser;
 
 /**
@@ -183,21 +184,10 @@ public class FXMLDocViewController implements Initializable {
         }   
     }
     
-    private File saveFile(String title){
-    if(title==null || title.isEmpty()){
-          title = "Target File";
-        }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open "+ title);
-        Stage stage = new Stage();
-        File selection = fileChooser.showSaveDialog(stage);
-        System.out.println("Selection = "+selection);
-        return selection;
-    }
     
     @FXML
     void onBtnSavePDF(ActionEvent event) {
-        File file = saveFile(null);
+        File file = Utils.saveFileDlg(null);
         if(file==null) return;
          XKeep keep = (XKeep)MainApp.getPrimaryStage().getProperties().get("xkeep");
         try {
