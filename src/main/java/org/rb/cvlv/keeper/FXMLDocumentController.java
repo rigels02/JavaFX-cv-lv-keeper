@@ -42,7 +42,8 @@ import javax.xml.transform.stream.StreamResult;
 import org.rb.cvlv.keeper.model.Keep;
 import org.rb.cvlv.keeper.model.XKeep;
 import org.rb.cvlv.keeper.model.XStatus;
-import org.rb.cvlv.keeper.parser.ParserJsoup;
+import org.rb.cvlv.keeper.parser.*;
+
 import org.rb.cvlv.keeper.xmlparser.SimpleXMLParser;
 import org.w3c.dom.Document;
 
@@ -52,7 +53,10 @@ import org.w3c.dom.Document;
  */
 public class FXMLDocumentController implements Initializable {
     public final static String FILEPATH= "bookmarks.xml";
-    private final static String HOME="https://www.cv.lv";
+    
+    private Parser currentParser;
+    //private final static String HOME="https://www.cv.lv";
+    //private final static String NVALV="https://cvvp.nva.gov.lv/#/pub/vakances/saraksts";
     private final static String DATEFMT="dd/MM/yyyy";
     
     @FXML
@@ -117,8 +121,10 @@ private Image i_noapp,i_apply, i_int1, i_int2, i_canceled;
              
          });
          fxProgressBar.setVisible(true);
-         webEngine.load(HOME);
-         fxTextUrl.setText(HOME);
+         
+         currentParser= Parser.Home;
+         webEngine.load(ParserJsoupFactory.init().getUrl(Parser.Home));
+         fxTextUrl.setText(ParserJsoupFactory.init().getUrl(Parser.Home));
          fxListView.setCellFactory(new Callback<ListView<XKeep>, ListCell<XKeep>>() {
             @Override
              public ListCell<XKeep> call(ListView<XKeep> param) {
@@ -210,8 +216,12 @@ private void resizeImageView(ImageView icon) {
     void onBtnSave(ActionEvent event) {
         final WebEngine webEngine = fxWebView.getEngine();
          org.w3c.dom.Document xmlDoc = webEngine.getDocument();
+        //test
+        String url = webEngine.getLocation();
         String xmlString = transformXML(xmlDoc);
-        ParserJsoup parser = new ParserJsoup(xmlString);    
+        
+        IParserJsoup parser = ParserJsoupFactory.init().getJsoupParser(currentParser, xmlString);
+        //ParserJsoup_CVLV parser = new ParserJsoup_CVLV(xmlString);    
         parser.process();
        
         String scrapHtml = parser.getBodyHTML();
@@ -313,11 +323,11 @@ private void resizeImageView(ImageView icon) {
     
      @FXML
     void onBtnHome(ActionEvent event) {
-        fxTextUrl.setText(HOME);
-        fxWebView.getEngine().load(HOME);
+        fxTextUrl.setText(ParserJsoupFactory.init().getUrl(currentParser));
+        fxWebView.getEngine().load(ParserJsoupFactory.init().getUrl(currentParser));
     }
 
-    private void printbody(ParserJsoup parser) {
+    private void printbody(IParserJsoup parser) {
         System.out.println(">>>>----------printbody() HTML-------");
          System.out.println(parser.getBodyHTML());
         System.out.println("----------printbody() HTML-------<<<<");
@@ -334,5 +344,19 @@ private void resizeImageView(ImageView icon) {
     fxListView.getItems().add(xkeep);
     keeps.add(xkeep);
     }
+    
+    //--- On menu item selection ---//
+     @FXML
+    void onCVLVselected(ActionEvent event) {
+        fxTextUrl.setText(ParserJsoupFactory.init().getUrl(Parser.Home));
+        fxWebView.getEngine().load(ParserJsoupFactory.init().getUrl(Parser.Home));
+        currentParser = Parser.Home;
+    }
 
+    @FXML
+    void onNVASelected(ActionEvent event) {
+        fxTextUrl.setText(ParserJsoupFactory.init().getUrl(Parser.NVA));
+        fxWebView.getEngine().load(ParserJsoupFactory.init().getUrl(Parser.NVA));
+        currentParser = Parser.NVA;
+    }
 }

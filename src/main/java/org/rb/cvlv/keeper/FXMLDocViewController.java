@@ -3,6 +3,7 @@ package org.rb.cvlv.keeper;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.sql.Date;
 import java.text.DateFormat;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,6 +39,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import javafx.util.converter.LocalDateStringConverter;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.rb.cvlv.keeper.files.PdfWriter;
 import org.rb.cvlv.keeper.model.XKeep;
 import org.rb.cvlv.keeper.model.XStatus;
@@ -49,6 +53,17 @@ import org.rb.cvlv.keeper.xmlparser.SimpleXMLParser;
  * @author raitis
  */
 public class FXMLDocViewController implements Initializable {
+    
+    private final static String HTMLTMPL="<!DOCTYPE html>\n" +
+"<html>\n" +
+"    <head>\n" +
+"        <title>Html</title>\n" +
+"        <meta charset=\"UTF-8\">\n" +
+"        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n" +
+"    </head>\n" +
+"    <body> %s  \n" +
+"    </body>\n" +
+"</html>";
 
     @FXML
     private Label fxLblTitle;
@@ -186,13 +201,48 @@ public class FXMLDocViewController implements Initializable {
     
     
     @FXML
+    void onBtnSaveHTML(ActionEvent event) {
+
+        File file = Utils.saveFileDlg(null);
+        if(file==null) return;
+         XKeep keep = (XKeep)MainApp.getPrimaryStage().getProperties().get("xkeep");
+        try {
+            String xstatus = "Status: "+getStatusWithDate(keep);
+            String dDoc = keep.getHtmlScrap();
+           
+            String htmlDoc1 = String.format("<div>Link: <a href=\"%s\">%s</a><br/><h2>%s</h2></div>%s",
+                    keep.getPageUrl(),keep.getPageUrl(),xstatus,dDoc );
+            String htmlDoc2 = String.format(HTMLTMPL, htmlDoc1);
+            PrintWriter writer = new PrintWriter(file,"UTF-8");
+            writer.write(htmlDoc2);
+            writer.close();
+            
+        } catch (Exception ex) {
+            Logger.getLogger(FXMLDocViewController.class.getName()).log(Level.SEVERE, null, ex);
+            new Alert(Alert.AlertType.ERROR, ex.getMessage(),ButtonType.OK).showAndWait();
+            return;
+        }
+        
+        new Alert(Alert.AlertType.INFORMATION,"HTML file "+file.getName()+" saved").showAndWait();
+    }
+    
+    @FXML
     void onBtnSavePDF(ActionEvent event) {
         File file = Utils.saveFileDlg(null);
         if(file==null) return;
          XKeep keep = (XKeep)MainApp.getPrimaryStage().getProperties().get("xkeep");
         try {
             String xstatus = "Status: "+getStatusWithDate(keep);
-            String xmlDoc = keep.getHtmlScrap();
+            String dDoc = keep.getHtmlScrap();
+            /**
+             * Html can contains <br> , but for xml valid is <br/>
+             * So, we need to replace all <br> with <br/>
+             */
+            String rdoc = dDoc.replaceAll("<br>", "<br/>");
+            
+            //make again valid xml document from html doc for pdf convertion
+            Document xmlDoc = Jsoup.parse(rdoc, "",org.jsoup.parser.Parser.xmlParser());
+            
             String xmlDoc1 = String.format("<div>Link: <a href=\"%s\">%s</a><br/><h2>%s</h2></div>%s",
                     keep.getPageUrl(),keep.getPageUrl(),xstatus,xmlDoc );
             //String xmlDoc = PdfWriter.tidyUp(htmlDoc);

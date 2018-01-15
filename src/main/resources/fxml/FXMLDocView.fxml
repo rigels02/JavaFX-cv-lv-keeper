@@ -100,6 +100,11 @@
                               <Insets left="5.0" right="5.0" top="5.0" />
                            </HBox.margin>
                         </Button>
+                        <Button mnemonicParsing="false" onAction="#onBtnSaveHTML" text="Save Html">
+                           <HBox.margin>
+                              <Insets left="5.0" right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
                      </children></HBox>
                </children>
             </VBox>

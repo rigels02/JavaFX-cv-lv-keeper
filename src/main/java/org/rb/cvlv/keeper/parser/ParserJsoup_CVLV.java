@@ -15,9 +15,9 @@ import org.jsoup.select.Elements;
  *
  * @author raitis
  */
-public class ParserJsoup {
+public class ParserJsoup_CVLV implements IParserJsoup {
 
-    private static final Logger LOG = Logger.getLogger(ParserJsoup.class.getName());
+    private static final Logger LOG = Logger.getLogger(ParserJsoup_CVLV.class.getName());
     
     private final String pubDate = "Published:";
     private final String deadDate = "Deadline:";
@@ -30,7 +30,7 @@ public class ParserJsoup {
     private Date published;
     private Date deadline;
 
-    public ParserJsoup(String docString) {
+    public ParserJsoup_CVLV(String docString) {
         //JSoup by default uses html doc output settings
         //Itext for PDF convertion uses XML imput document
         //To make Jsoup generate xml valid document the xmlParser is used
@@ -45,6 +45,7 @@ public class ParserJsoup {
 
     }
 
+    @Override
     public void process() {
         getDates();
         getTitleAndLocation();
@@ -61,7 +62,7 @@ public class ParserJsoup {
                 try {
                     published = gDate.getDate(txt);
                 } catch (ParseException ex) {
-                    Logger.getLogger(ParserJsoup.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ParserJsoup_CVLV.class.getName()).log(Level.SEVERE, null, ex);
                 }
               continue;
             }
@@ -69,8 +70,9 @@ public class ParserJsoup {
                 try {
                     deadline = gDate.getDate(txt);
                 } catch (ParseException ex) {
-                    Logger.getLogger(ParserJsoup.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(ParserJsoup_CVLV.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                //continue;
                 //continue;
             }
             
@@ -88,23 +90,28 @@ public class ParserJsoup {
         System.out.println("DeadTime: " + deadline);
     }
 
+    @Override
     public String getTitle() {
         return title;
     }
 
+    @Override
     public String getLocation() {
         return location;
     }
 
+    @Override
     public Date getPublished() {
         return published;
     }
 
+    @Override
     public Date getDeadline() {
         return deadline;
     }
 
-    //---test----//
+    
+    @Override
     public String getBodyHTML(){
         Elements elements = doc.select("div#page-main-content");
        elements.select("ul#page-breadcrumbs").remove();
@@ -115,6 +122,7 @@ public class ParserJsoup {
         return elements.html();
         //doc.getElementsByTag("body").outerHtml();
     }
+    @Override
     public String getBodyTxt(){
      return doc.getElementsByTag("body").text();
     }
