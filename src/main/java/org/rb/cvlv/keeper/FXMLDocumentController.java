@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -81,6 +82,7 @@ public class FXMLDocumentController implements Initializable {
    
 //icons for listview
 private Image i_noapp,i_apply, i_int1, i_int2, i_canceled;     
+private boolean saveAfterReload;
      
      
     @Override
@@ -110,6 +112,10 @@ private Image i_noapp,i_apply, i_int1, i_int2, i_canceled;
                  fxProgressBar.setVisible(false);
                  fxTextUrl.setText(webEngine.getLocation());
                  fxBtnSave.setDisable(false);
+                 if(saveAfterReload){
+                  saveAfterReload=false;
+                  saveLoadedPage();
+                 }
             } 
              if(newValue == Worker.State.RUNNING){
                 System.out.println("loading...");
@@ -139,7 +145,11 @@ private Image i_noapp,i_apply, i_int1, i_int2, i_canceled;
                          } else {
                              
                              setText(item.printItem(sf));
-                             setStyle("-fx-padding:4px;-fx-border-width:1px;-fx-border-color: green;-fx-border-radius: 5;");
+                             if(deadLineDateNotExpired(item.getDeadline()))
+                               setStyle("-fx-padding:4px;-fx-border-width:1;-fx-border-color: green;-fx-border-radius: 5;-fx-border-insets:1");
+                             else
+                                setStyle("-fx-padding:4px;-fx-border-width:1px;-fx-border-color: red;-fx-border-radius: 5;-fx-border-insets:1");
+                             
                              ImageView icon = getIcon(item.getStatus());
                              //resizeImageView(icon);
                              setGraphic(icon);
@@ -212,11 +222,10 @@ private void resizeImageView(ImageView icon) {
         return xml;    
     }
     
-    @FXML
-    void onBtnSave(ActionEvent event) {
+    private void saveLoadedPage(){
         final WebEngine webEngine = fxWebView.getEngine();
-         org.w3c.dom.Document xmlDoc = webEngine.getDocument();
-        //test
+        org.w3c.dom.Document xmlDoc = webEngine.getDocument();
+        
         String url = webEngine.getLocation();
         String xmlString = transformXML(xmlDoc);
         
@@ -233,6 +242,23 @@ private void resizeImageView(ImageView icon) {
         addItem(xkeep);
         
         saveData();
+    }
+    
+    @FXML
+    void onBtnSave(ActionEvent event) {
+        final WebEngine webEngine = fxWebView.getEngine();
+        if(currentParser.equals(Parser.NVA)){
+          //reload selected page to get its correct location url
+          //
+          saveAfterReload =true;
+          webEngine.reload();
+         
+          //save is done after reload of page completed. See webengine load worker handler
+          //stm at line #103
+          return;
+          
+        }
+        saveLoadedPage();
     }
 
     private void loadData() {
@@ -334,6 +360,12 @@ private void resizeImageView(ImageView icon) {
        
     }
 
+    private boolean deadLineDateNotExpired(Date deadLineDate){
+    
+        if(deadLineDate==null) return true;
+        return deadLineDate.after(new Date());
+    }
+    
     private void removeItem(int idx) {
         fxListView.getItems().remove(idx);
         keeps.remove(idx);
