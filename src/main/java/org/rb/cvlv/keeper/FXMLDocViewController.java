@@ -118,7 +118,7 @@ public class FXMLDocViewController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         
-        XKeep keep = (XKeep)MainApp.getPrimaryStage().getProperties().get("xkeep");
+        XKeep keep = (XKeep)MainApp.getPrimaryStage().getProperties().get(PropertyConst.XKEEP_P);
         SimpleDateFormat sf = new SimpleDateFormat("dd/MM/yyyy");
         fxLblTitle.setText(String.format("%s: %s", XKeep.TITLE,keep.getTitle()));
         fxLblPublished.setText(String.format("%s: %s",XKeep.PD, 
@@ -178,8 +178,8 @@ public class FXMLDocViewController implements Initializable {
         //update comments
         
         if(!isValidDates()) return;
-        List<XKeep> keeps = (List<XKeep>) MainApp.getPrimaryStage().getProperties().get("xkeeps");
-        int idx = (int) MainApp.getPrimaryStage().getProperties().get("selectedIdx");
+        List<XKeep> keeps = (List<XKeep>) MainApp.getPrimaryStage().getProperties().get(PropertyConst.XKEEPS_P);
+        int idx = (int) MainApp.getPrimaryStage().getProperties().get(PropertyConst.SELIDX_P);
         keeps.get(idx).setComments(fxTxtComments.getText());
         updateStatusAndDateFields(keeps.get(idx));
         //Test
@@ -205,7 +205,7 @@ public class FXMLDocViewController implements Initializable {
 
         File file = Utils.saveFileDlg(null);
         if(file==null) return;
-         XKeep keep = (XKeep)MainApp.getPrimaryStage().getProperties().get("xkeep");
+         XKeep keep = (XKeep)MainApp.getPrimaryStage().getProperties().get(PropertyConst.XKEEP_P);
         try {
             String xstatus = "Status: "+getStatusWithDate(keep);
             String dDoc = keep.getHtmlScrap();
@@ -230,7 +230,7 @@ public class FXMLDocViewController implements Initializable {
     void onBtnSavePDF(ActionEvent event) {
         File file = Utils.saveFileDlg(null);
         if(file==null) return;
-         XKeep keep = (XKeep)MainApp.getPrimaryStage().getProperties().get("xkeep");
+         XKeep keep = (XKeep)MainApp.getPrimaryStage().getProperties().get(PropertyConst.XKEEP_P);
         try {
             String xstatus = "Status: "+getStatusWithDate(keep);
             String dDoc = keep.getHtmlScrap();

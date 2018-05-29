@@ -87,9 +87,7 @@ private boolean saveAfterReload;
      
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        //
-        String ex = (String) MainApp.getPrimaryStage().getProperties().get("hi");
-        //
+       
         i_noapp = new Image(getClass().getResourceAsStream("/images/notapplyt.png"));
         i_apply = new Image(getClass().getResourceAsStream("/images/applyt.png"));
         i_int1 = new Image(getClass().getResourceAsStream("/images/int1t.png"));
@@ -296,7 +294,7 @@ private void resizeImageView(ImageView icon) {
         */
         ObservableList<XKeep> olist = FXCollections.observableArrayList(xkeeps);
         fxListView.setItems(olist);
-        Integer idx_o = (Integer) MainApp.getPrimaryStage().getProperties().get("selectedIdx");
+        Integer idx_o = (Integer) MainApp.getPrimaryStage().getProperties().get(PropertyConst.SELIDX_P);
         int idx = -1;
         if(idx_o != null && (idx= idx_o) >= 0){
             fxListView.getSelectionModel().select(idx);
@@ -310,9 +308,9 @@ private void resizeImageView(ImageView icon) {
         if(fxListView.getSelectionModel().getSelectedIndex()< 0) return;
         int idx = fxListView.getSelectionModel().getSelectedIndex();
         XKeep keep = fxListView.getSelectionModel().getSelectedItem();
-        MainApp.getPrimaryStage().getProperties().put("xkeep", keep);
-        MainApp.getPrimaryStage().getProperties().put("xkeeps",this.keeps);
-        MainApp.getPrimaryStage().getProperties().put("selectedIdx",idx);
+        MainApp.getPrimaryStage().getProperties().put(PropertyConst.XKEEP_P, keep);
+        MainApp.getPrimaryStage().getProperties().put(PropertyConst.XKEEPS_P,this.keeps);
+        MainApp.getPrimaryStage().getProperties().put(PropertyConst.SELIDX_P,idx);
         Stage stage = MainApp.getPrimaryStage();
         Parent root = FXMLLoader.load(getClass().getResource("/fxml/FXMLDocView.fxml"));
         
@@ -320,8 +318,7 @@ private void resizeImageView(ImageView icon) {
         scene.getStylesheets().add("/styles/fxmldocview.css");
         
         stage.setTitle("Comments");
-        //stage.getProperties()
-        //scene.getProperties().put("hi", "hello from MainApp");
+       
         stage.setScene(scene);
         stage.show();
     }

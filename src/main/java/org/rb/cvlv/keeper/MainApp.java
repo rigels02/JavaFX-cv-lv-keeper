@@ -35,8 +35,7 @@ public class MainApp extends Application {
         scene.getStylesheets().add("/styles/Styles.css");
         
         stage.setTitle("JavaFX CV.LV keeper");
-        //stage.getProperties()
-        //scene.getProperties().put("hi", "hello from MainApp");
+       
         stage.setScene(scene);
         stage.show();
     }
