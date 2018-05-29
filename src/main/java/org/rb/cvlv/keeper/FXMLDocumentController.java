@@ -298,6 +298,8 @@ private void resizeImageView(ImageView icon) {
         int idx = -1;
         if(idx_o != null && (idx= idx_o) >= 0){
             fxListView.getSelectionModel().select(idx);
+            fxListView.getFocusModel().focus(idx);
+            fxListView.scrollTo(idx);
         }
         
     }
