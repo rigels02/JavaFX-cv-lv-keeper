@@ -296,6 +296,11 @@ private void resizeImageView(ImageView icon) {
         */
         ObservableList<XKeep> olist = FXCollections.observableArrayList(xkeeps);
         fxListView.setItems(olist);
+        Integer idx_o = (Integer) MainApp.getPrimaryStage().getProperties().get("selectedIdx");
+        int idx = -1;
+        if(idx_o != null && (idx= idx_o) >= 0){
+            fxListView.getSelectionModel().select(idx);
+        }
         
     }
     
