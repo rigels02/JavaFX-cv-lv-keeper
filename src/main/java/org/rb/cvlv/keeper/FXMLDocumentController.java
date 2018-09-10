@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -143,11 +144,15 @@ private boolean saveAfterReload;
                          } else {
                              
                              setText(item.printItem(sf));
-                             if(deadLineDateNotExpired(item.getDeadline()))
-                               setStyle("-fx-padding:4px;-fx-border-width:1;-fx-border-color: green;-fx-border-radius: 5;-fx-border-insets:1");
-                             else
-                                setStyle("-fx-padding:4px;-fx-border-width:1px;-fx-border-color: red;-fx-border-radius: 5;-fx-border-insets:1");
-                             
+                             if (deadLineDateNotExpired(item.getDeadline())) {
+                                 setStyle("-fx-padding:4px;-fx-border-width:1;-fx-border-color: green;-fx-border-radius: 5;-fx-border-insets:1");
+                             } else if (twoWeeksAfterDeadLineDate(item.getDeadline())) {
+                                 setStyle("-fx-padding:4px;-fx-border-width:1px;-fx-border-color: black;-fx-border-radius: 5;-fx-border-insets:1");
+
+                             } else {
+                                 setStyle("-fx-padding:4px;-fx-border-width:1px;-fx-border-color: red;-fx-border-radius: 5;-fx-border-insets:1");
+
+                             }
                              ImageView icon = getIcon(item.getStatus());
                              //resizeImageView(icon);
                              setGraphic(icon);
@@ -368,6 +373,24 @@ private void resizeImageView(ImageView icon) {
     
         if(deadLineDate==null) return true;
         return deadLineDate.after(new Date());
+    }
+    
+    /**
+     * Test that two weeks have gone after deadLineDate.
+     * @param deadLineDate
+     * @return 
+     */
+    private boolean twoWeeksAfterDeadLineDate(Date deadLineDate){
+    
+        if(deadLineDate==null) return true;
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(deadLineDate);
+        //two weeks = 14 days
+        int days= 14;
+        cal.add(Calendar.DAY_OF_YEAR,days);
+        Date twoWeeksDate = cal.getTime();
+        Date currentDate = new Date();
+        return currentDate.after(twoWeeksDate);
     }
     
     private void removeItem(int idx) {
